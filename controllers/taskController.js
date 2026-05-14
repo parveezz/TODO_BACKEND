@@ -3,10 +3,17 @@ const Task = require('../models/Task');
 // @desc    Get all tasks
 exports.getTasks = async (req, res) => {
   try {
-    const tasks = await Task.find({ user: req.user.id }).sort('-createdAt');
+    const query = { user: req.user.id };
+    
+    // Allow filtering by dueDate (e.g., /api/tasks?dueDate=Today)
+    if (req.query.dueDate) {
+      query.dueDate = req.query.dueDate;
+    }
+
+    const tasks = await Task.find(query).sort('-createdAt');
     res.status(200).json({ success: true, count: tasks.length, data: tasks });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({ success: false, message: 'Could not fetch tasks. ' + err.message });
   }
 };
 
